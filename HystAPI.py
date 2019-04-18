@@ -30,10 +30,10 @@ class Hyst():
     '''Contains data of one hysteresis measurement'''
 
     # Constructor
-    def __init__(self, pathToData=''):
+    def __init__(self, pathToData='', freq=-1.0):
         # Initialize all members
         self.pathToData = pathToData
-        self.freq = 0.0
+        self.freq = freq
         self.extrema = []   # array indices of minima and maxima in H (has 4 entries in this order: [max1, min1, max2, min2])
         self.data = {'t': [], 'H': [], 'J': []}  # container for the raw data
         self.muDiff, self.muAbs = ([] for i in range(2))   # arrays of calculated data
@@ -51,10 +51,18 @@ class Hyst():
         except FileNotFoundError:
             print('ERROR: The file '+self.pathToData+' does not exist!')
             sys.exit(1)
-        # Parse header and data seperately
-        headerLineNum = 27  # that is a hard coded number
+        # Parse header (containing information like frequency, etc.) and hysteresis data seperately
+        headerLineNum = 27  # that is a hard coded number, the number of header lines
         header = self._readHeader(fileStream, headerLineNum) # the header contains information like the frequency
-        self.freq = float(header[15][4:-1])
+        # If frequency is not given to constructor parse it from header of data file
+        if self.freq==-1.0:
+            freqDummy = header[15][4:-1] # for this specific files the frequency is in line 15
+            try:
+                self.freq = float(freqDummy)
+            except ValueError:
+                print('ERROR: The parsed frequency from file '+self.pathToData+' is not a float!')
+                sys.exit(1)
+        # Read time, applied field and magnetic polarisation from data file
         t, H, J = self._readData(fileStream, headerLineNum)
         self.data = { 't': t, 'H': H, 'J': J }
         # Only the hysteresis between first and second maximum is interesting, that means we need the extrema of H
@@ -82,7 +90,7 @@ class Hyst():
 
     # Utilities
     def _calcLosses(self, steps=20):
-        # Get losses by surface under hysteresis (first smooth data then integrate by trapezoidrule)
+        # Get losses by surface under hysteresis (first smooth data, then integrate by trapezoidrule)
         maxima, minima = self._findExtrema(self.data['H'])
         data_x = smoothing(np.copy(self.data['H'])-np.min(self.data['H']), 501, 4)
         data_y = smoothing(np.copy(self.data['J'])-np.min(self.data['J']), 501, 4)
@@ -214,15 +222,15 @@ class Curve():
 
     # Constructor
     def __init__(self, dataLocation='', curveName=''):
-        self.dataLocation = dataLocation
-        self.curveName = curveName
+        self.dataLocation = dataLocation # this is a folder containing data files of measurement at different frequencies for the same sample
+        self.curveName = curveName # name used default as title of plots
         self.data = {}
         # Load the data of any hysteresis inside the folder dataLocation
         self.data = self._setData(dataLocation)
         # Calculate fits from given data
         self._updateData()
 
-    # Inject Hyst objects into Curve
+    # Inject Hyst objects into Curve (also an empty Curve() can be build an Hyst() objects injected by hand)
     def addHyst(self, hyst):
         self.data[hyst.freq] = hyst
         self._updateData()
@@ -239,7 +247,11 @@ class Curve():
         return data
     def _getFilenames(self, basePath):
         filePaths = []
-        # Pathwalk with the given directory
+        # Check if path exists
+        if os.path.isdir(basePath)==false:
+            print('ERROR: '+basePath+' is not a path!')
+            sys.exit(1)
+        # Pathwalk with the given directory to get filenames in it
         for dirpath, dirnames, filenames in os.walk(basePath):
             for filename in filenames:
                 filePaths.append(os.path.join(dirpath, filename))
@@ -350,9 +362,9 @@ class Measurement():
     ''' The Measurement object collects multiple Curve objects to plot them all together'''
 
     # Constructor
-    def __init__(self, measurementName=''):
+    def __init__(self, measurementName=''): # the constructor always builds an empty instance which must be filled with the class method .addCurve()
         self.measurementName = measurementName
-        self.collection = {}    # that is a container for multiple Curve objects
+        self.collection = {}    # that is an empty container for multiple Curve objects
 
     # Inject Curve objects in Measurement
     def addCurve(self, curve):
