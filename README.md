@@ -3,6 +3,7 @@
 HystAPI is a module to process, evaluate and produce ready-to-publish hysteresis plots from magnetic measurements. It can be imported to an interactive python command line (like ipython) or to other python scripts (like in test.py).
 
 The core functionality of the API is collected in three classes:
+
 - **Hyst**: represents the data from one hysteresis measurement
 - **Curve**: collects multiple instances of Hyst measured at different frequencies to represent the frequency dependence of key-characteristics of the magnetic sample (e.g. magnetization losses, coercive field, etc.)
 - **Measurement**: collects multiple instances of Curve for different magnetic samples and can produce ready-to-publish plots which compare key-characteristics of magnetic materials across different samples
@@ -13,4 +14,13 @@ created from this testdata:
 ![Hystereses of annealed FeSi3](exampleHysteresis.png)
 ![Magnetization losses of FeSi3](exampleLosses.png)
 
-NOTE: HystAPI uses the python3 libraries matplotlib, numpy, scipy and prettytable. They must be installed on your system to use it!
+
+## Requirements
+
+HystAPI uses the python3 libraries 
+
+- `matplotlib`
+- `scipy`
+- `prettytable`
+
+Install them by typing `pip3 install -r requirements.txt`.

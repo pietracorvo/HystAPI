@@ -1,5 +1,5 @@
-#!/usr/bin/env python
-# coding: utf8
+#!/usr/bin/env python3
+
 
 ###############################################################################
 
@@ -248,7 +248,7 @@ class Curve():
     def _getFilenames(self, basePath):
         filePaths = []
         # Check if path exists
-        if os.path.isdir(basePath)==false:
+        if not os.path.isdir(basePath):
             print('ERROR: '+basePath+' is not a path!')
             sys.exit(1)
         # Pathwalk with the given directory to get filenames in it
@@ -278,7 +278,11 @@ class Curve():
             return y0 + A1 * np.exp(-x/t1) + A2 * np.exp(-x/t2)
         y = [x for _,x in sorted(zip(freq, y))]
         freq = sorted(freq)
-        param, dummy = curve_fit(fitfun, freq, y)
+        param = [1, 1, 1, 1, 1]
+        try:
+            param, dummy = curve_fit(fitfun, freq, y)
+        except RuntimeError:
+            print('ERROR: Could not find an optimal fit for: '+str(self.curveName))
         evaluation = fitfun(np.linspace(np.min(freq), np.max(freq), 1000), *param)
         xfit = np.linspace(np.min(freq), np.max(freq), 1000)
         return { 'val':y, 'fit':evaluation, 'x':xfit, 'par':param }
@@ -334,6 +338,7 @@ class Curve():
         ax.set_title(title)
         ax.set_xlabel(xlabel)
         ax.set_ylabel(ylabel)
+        ax.tick_params(direction='in')
         ax.grid(color='0.75', linestyle='--', linewidth=0.5)
         ax = fig.axes[0]
         ax.plot(self._freqs(), data, marker='o', linestyle='', color='blue')
@@ -378,6 +383,7 @@ class Measurement():
         ax.set_title(title)
         ax.set_xlabel(xlabel)
         ax.set_ylabel(ylabel)
+        ax.tick_params(direction='in')
         ax.grid(color='0.75', linestyle='--', linewidth=0.5)
         return fig
     def plotLosses(self):

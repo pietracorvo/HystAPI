@@ -11,14 +11,14 @@ sample4 = HystAPI.Curve('./testData/FeSi3_LN', ' FeSi3 (T = 293K)')
 sample5 = HystAPI.Curve('./testData/FeSi3_LN_ht', 'FeSi3 (T = 293K, heat treated)')
 
 # Initialize a measurement ...
-messreihe = HystAPI.Measurement('FeSi3 (Electrical Steel)')
+measurement = HystAPI.Measurement('FeSi3 (Electrical Steel)')
 
 # ... and add datasets to the measurement 
-messreihe.addCurve(sample1)
-messreihe.addCurve(sample2)
-messreihe.addCurve(sample3)
-messreihe.addCurve(sample4)
-messreihe.addCurve(sample5)
+measurement.addCurve(sample1)
+measurement.addCurve(sample2)
+measurement.addCurve(sample3)
+measurement.addCurve(sample4)
+measurement.addCurve(sample5)
 
 # Plot the hystereses of each sample
 sample1.plotHyst()
@@ -28,12 +28,12 @@ sample4.plotHyst()
 sample5.plotHyst()
 
 # Plot the main results from all samples together
-messreihe.plotLosses()
-messreihe.plotHc()
-messreihe.plotMuMax()
+measurement.plotLosses()
+measurement.plotHc()
+measurement.plotMuMax()
 
 # Save calculated fit parameters in a text file 
-messreihe.printInfo('testFitParameters.txt')
+measurement.printInfo('testFitParameters.txt')
 
 plt.show()
 
